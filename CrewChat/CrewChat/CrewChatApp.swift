@@ -11,7 +11,12 @@ import SwiftUI
 struct CrewChatApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ChatView()
         }
     }
+}
+
+
+#Preview {
+    ChatView()
 }
