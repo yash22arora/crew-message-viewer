@@ -20,8 +20,11 @@ struct ChatView: View {
                 
                 Divider()
                 
-                // TODO: Input bar
-                
+                // Input bar
+                MessageInputBar(
+                    messageText: $messageText,
+                    onSend: sendMessage,
+                )
             }
             .navigationTitle("CrewChat")
             .navigationBarTitleDisplayMode(.inline)
