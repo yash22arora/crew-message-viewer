@@ -25,7 +25,7 @@ struct ImageMessageView: View {
     
     private var fileSizeText: String {
         guard let size = message.file?.fileSize else { return "" }
-        return ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+        return ImageStorageService.shared.getImageSizeInText(size: size)
     }
     
     var body: some View {

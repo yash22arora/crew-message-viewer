@@ -96,4 +96,8 @@ final class ImageStorageService {
         
         return nil
     }
+    
+    func getImageSizeInText(size: Int) -> String {
+        return ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+    }
 }
