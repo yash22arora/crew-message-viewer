@@ -11,6 +11,13 @@ import SwiftUI
 struct ImageMessageView: View {
     let message: Message
     
+    @State private var showFullScreenImage = false
+    
+    /// Full resolution image path for full screen view
+    private var fullImagePath: String? {
+        message.file?.path
+    }
+    
     private var imagePath: String? {
         // Prefer thumbnail if available, otherwise use main file path
         message.file?.thumbnail?.path ?? message.file?.path
@@ -25,6 +32,11 @@ struct ImageMessageView: View {
         VStack(alignment: .leading, spacing: 8) {
             // Image
             imageView
+                .onTapGesture {
+                    if fullImagePath != nil {
+                        showFullScreenImage = true
+                    }
+                }
             
             // Caption (if any)
             if !message.message.isEmpty {
@@ -37,6 +49,11 @@ struct ImageMessageView: View {
                 Text(fileSizeText)
                     .font(.caption)
                     .foregroundColor(.secondary)
+            }
+        }
+        .fullScreenCover(isPresented: $showFullScreenImage) {
+            if let path = fullImagePath {
+                FullScreenImageView(imagePath: path)
             }
         }
     }
