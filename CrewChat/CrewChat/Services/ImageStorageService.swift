@@ -67,4 +67,33 @@ final class ImageStorageService {
         let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return documentsURL.appendingPathComponent(path)
     }
+    
+    // MARK: - Image Loading Utilities
+    
+    /// Check if a path is a remote URL
+    /// - Parameter path: The path to check
+    /// - Returns: True if the path is an HTTP/HTTPS URL
+    func isRemoteURL(_ path: String) -> Bool {
+        path.hasPrefix("http://") || path.hasPrefix("https://")
+    }
+    
+    /// Load an image from a local path
+    /// - Parameter path: The file path (absolute or relative to Documents)
+    /// - Returns: The loaded UIImage, or nil if not found
+    func loadLocalImage(from path: String) -> UIImage? {
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        
+        // Try absolute path first
+        if fileManager.fileExists(atPath: path) {
+            return UIImage(contentsOfFile: path)
+        }
+        
+        // Try relative path from Documents
+        let absoluteURL = documentsURL.appendingPathComponent(path)
+        if fileManager.fileExists(atPath: absoluteURL.path) {
+            return UIImage(contentsOfFile: absoluteURL.path)
+        }
+        
+        return nil
+    }
 }

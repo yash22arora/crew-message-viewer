@@ -61,7 +61,7 @@ struct ImageMessageView: View {
     @ViewBuilder
     private var imageView: some View {
         if let path = imagePath {
-            if isRemoteURL(path), let url = URL(string: path) {
+            if ImageStorageService.shared.isRemoteURL(path), let url = URL(string: path) {
                 // Load from remote URL using AsyncImage
                 AsyncImage(url: url) { phase in
                     switch phase {
@@ -80,7 +80,7 @@ struct ImageMessageView: View {
                         imagePlaceholder
                     }
                 }
-            } else if let image = loadLocalImage(from: path) {
+            } else if let image = ImageStorageService.shared.loadLocalImage(from: path) {
                 // Load from local file path
                 Image(uiImage: image)
                     .resizable()
@@ -107,28 +107,6 @@ struct ImageMessageView: View {
         .frame(width: 150, height: 100)
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-    
-    private func isRemoteURL(_ path: String) -> Bool {
-        path.hasPrefix("http://") || path.hasPrefix("https://")
-    }
-    
-    private func loadLocalImage(from path: String) -> UIImage? {
-        let fileManager = FileManager.default
-        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
-        // Try absolute path first
-        if fileManager.fileExists(atPath: path) {
-            return UIImage(contentsOfFile: path)
-        }
-        
-        // Try relative path from Documents
-        let absoluteURL = documentsURL.appendingPathComponent(path)
-        if fileManager.fileExists(atPath: absoluteURL.path) {
-            return UIImage(contentsOfFile: absoluteURL.path)
-        }
-        
-        return nil
     }
 }
 

@@ -78,7 +78,7 @@ struct FullScreenImageView: View {
     
     @ViewBuilder
     private var imageContent: some View {
-        if isRemoteURL(imagePath), let url = URL(string: imagePath) {
+        if ImageStorageService.shared.isRemoteURL(imagePath), let url = URL(string: imagePath) {
             AsyncImage(url: url) { phase in
                 switch phase {
                 case .empty:
@@ -94,7 +94,7 @@ struct FullScreenImageView: View {
                     errorView
                 }
             }
-        } else if let uiImage = loadLocalImage(from: imagePath) {
+        } else if let uiImage = ImageStorageService.shared.loadLocalImage(from: imagePath) {
             Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFit()
@@ -122,26 +122,6 @@ struct FullScreenImageView: View {
             Text("Unable to load image")
                 .foregroundColor(.gray)
         }
-    }
-    
-    private func isRemoteURL(_ path: String) -> Bool {
-        path.hasPrefix("http://") || path.hasPrefix("https://")
-    }
-    
-    private func loadLocalImage(from path: String) -> UIImage? {
-        let fileManager = FileManager.default
-        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        
-        if fileManager.fileExists(atPath: path) {
-            return UIImage(contentsOfFile: path)
-        }
-        
-        let absoluteURL = documentsURL.appendingPathComponent(path)
-        if fileManager.fileExists(atPath: absoluteURL.path) {
-            return UIImage(contentsOfFile: absoluteURL.path)
-        }
-        
-        return nil
     }
 }
 
