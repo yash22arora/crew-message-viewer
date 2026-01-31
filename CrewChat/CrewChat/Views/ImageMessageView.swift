@@ -43,30 +43,60 @@ struct ImageMessageView: View {
     
     @ViewBuilder
     private var imageView: some View {
-        if let path = imagePath, let image = loadImage(from: path) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFit()
-                .frame(maxWidth: 200, maxHeight: 200)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-        } else {
-            // Fallback for failed image load
-            VStack(spacing: 8) {
-                Image(systemName: "photo")
-                    .font(.largeTitle)
-                    .foregroundColor(.secondary)
-                Text("Image unavailable")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+        if let path = imagePath {
+            if isRemoteURL(path), let url = URL(string: path) {
+                // Load from remote URL using AsyncImage
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .frame(width: 150, height: 100)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: 200, maxHeight: 200)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    case .failure:
+                        imagePlaceholder
+                    @unknown default:
+                        imagePlaceholder
+                    }
+                }
+            } else if let image = loadLocalImage(from: path) {
+                // Load from local file path
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 200, maxHeight: 200)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            } else {
+                imagePlaceholder
             }
-            .frame(width: 150, height: 100)
-            .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        } else {
+            imagePlaceholder
         }
     }
     
-    private func loadImage(from path: String) -> UIImage? {
-        // Handle both absolute paths and relative paths in Documents directory
+    private var imagePlaceholder: some View {
+        VStack(spacing: 8) {
+            Image(systemName: "photo")
+                .font(.largeTitle)
+                .foregroundColor(.secondary)
+            Text("Image unavailable")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(width: 150, height: 100)
+        .background(Color(.systemGray6))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+    
+    private func isRemoteURL(_ path: String) -> Bool {
+        path.hasPrefix("http://") || path.hasPrefix("https://")
+    }
+    
+    private func loadLocalImage(from path: String) -> UIImage? {
         let fileManager = FileManager.default
         let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
         
