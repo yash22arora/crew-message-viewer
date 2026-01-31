@@ -1,0 +1,205 @@
+[
+    {
+        "id": "msg-001",
+        "message": "Hi! I need help booking a flight to Mumbai.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520000000
+    },
+    {
+        "id": "msg-002",
+        "message": "Hello! I'd be happy to help you book a flight to Mumbai. When are you planning to travel?",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703520030000
+    },
+    {
+        "id": "msg-003",
+        "message": "Next Friday, December 29th.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520090000
+    },
+    {
+        "id": "msg-004",
+        "message": "Great! And when would you like to return?",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703520120000
+    },
+    {
+        "id": "msg-005",
+        "message": "January 5th. Also, I prefer morning flights.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520180000
+    },
+    {
+        "id": "msg-006",
+        "message": "Perfect! Let me search for morning flights from your location to Mumbai. Could you also share your departure city?",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703520210000
+    },
+    {
+        "id": "msg-007",
+        "message": "",
+        "type": "file",
+        "file": {
+            "path": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=400",
+            "fileSize": 245680,
+            "thumbnail": {
+                "path": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=100"
+            }
+        },
+        "sender": "user",
+        "timestamp": 1703520300000
+    },
+    {
+        "id": "msg-008",
+        "message": "Thanks for sharing! I can see you prefer IndiGo. Let me find the best options for you.",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703520330000
+    },
+    {
+        "id": "msg-009",
+        "message": "Flight options comparison",
+        "type": "file",
+        "file": {
+            "path": "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=400",
+            "fileSize": 189420,
+            "thumbnail": {
+                "path": "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=100"
+            }
+        },
+        "sender": "agent",
+        "timestamp": 1703520420000
+    },
+    {
+        "id": "msg-010",
+        "message": "The second option looks perfect! How do I proceed?",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520480000
+    },
+    {
+        "id": "msg-011",
+        "message": "You can proceed by selecting the flight and entering passenger details. Would you like me to help with that?",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703520540000
+    },
+    {
+        "id": "msg-012",
+        "message": "Yes please. It's just me traveling.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520600000
+    },
+    {
+        "id": "msg-013",
+        "message": "Got it! Please share your full name as per your ID and your date of birth.",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703520660000
+    },
+    {
+        "id": "msg-014",
+        "message": "Yashvardhan Arora, 12th April 1999.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520720000
+    },
+    {
+        "id": "msg-015",
+        "message": "Fare breakdown",
+        "type": "file",
+        "file": {
+            "path": "https://images.unsplash.com/photo-1502920514313-52581002a659?w=400",
+            "fileSize": 210340,
+            "thumbnail": {
+                "path": "https://images.unsplash.com/photo-1502920514313-52581002a659?w=100"
+            }
+        },
+        "sender": "agent",
+        "timestamp": 1703520780000
+    },
+    {
+        "id": "msg-016",
+        "message": "Looks good to me. What's the total amount?",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520840000
+    },
+    {
+        "id": "msg-017",
+        "message": "The total fare comes to ₹6,450 including taxes.",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703520900000
+    },
+    {
+        "id": "msg-018",
+        "message": "Alright, let's go ahead.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703520960000
+    },
+    {
+        "id": "msg-019",
+        "message": "Please choose your preferred payment method.",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703521020000
+    },
+    {
+        "id": "msg-020",
+        "message": "UPI would be great.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703521080000
+    },
+    {
+        "id": "msg-021",
+        "message": "UPI Payment QR",
+        "type": "file",
+        "file": {
+            "path": "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=400",
+            "fileSize": 175820,
+            "thumbnail": {
+                "path": "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?w=100"
+            }
+        },
+        "sender": "agent",
+        "timestamp": 1703521140000
+    },
+    {
+        "id": "msg-022",
+        "message": "Payment done.",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703521200000
+    },
+    {
+        "id": "msg-023",
+        "message": "🎉 Your booking is confirmed! I've emailed your ticket and itinerary.",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703521260000
+    },
+    {
+        "id": "msg-024",
+        "message": "Awesome, thank you for the smooth experience!",
+        "type": "text",
+        "sender": "user",
+        "timestamp": 1703521320000
+    },
+    {
+        "id": "msg-025",
+        "message": "You're welcome! Have a pleasant journey to Mumbai. ✈️",
+        "type": "text",
+        "sender": "agent",
+        "timestamp": 1703521380000
+    }
+]
