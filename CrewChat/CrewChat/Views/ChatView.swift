@@ -33,18 +33,12 @@ struct ChatView: View {
             .navigationTitle("CrewChat")
             .navigationBarTitleDisplayMode(.inline)
         }
-        .confirmationDialog("Choose Image Source", isPresented: $showingImageSourcePicker) {
-            Button("Photo Library") {
-                imagePickerSourceType = .photoLibrary
-                showingImagePicker = true
+        .sheet(isPresented: $showingImageSourcePicker) {
+            ImageSourcePickerSheet { sourceType in
+                handleImageSourceSelection(sourceType)
             }
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button("Camera") {
-                    imagePickerSourceType = .camera
-                    showingImagePicker = true
-                }
-            }
-            Button("Cancel", role: .cancel) {}
+            .presentationDetents([.height(200)])
+            .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(sourceType: imagePickerSourceType) { image in
@@ -150,6 +144,14 @@ struct ChatView: View {
         let text = messageText
         messageText = ""
         viewModel.sendMessage(text)
+    }
+    
+    private func handleImageSourceSelection(_ sourceType: ImageSourceType) {
+        showingImageSourcePicker = false
+        imagePickerSourceType = sourceType.uiImagePickerSourceType
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            showingImagePicker = true
+        }
     }
     
     private func handleSelectedImage(_ image: UIImage) {
