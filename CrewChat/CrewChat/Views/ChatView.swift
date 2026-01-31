@@ -11,6 +11,9 @@ import SwiftUI
 struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
     @State private var messageText = ""
+    @State private var showingImagePicker = false
+    @State private var showingImageSourcePicker = false
+    @State private var imagePickerSourceType: UIImagePickerController.SourceType = .photoLibrary
     
     var body: some View {
         NavigationStack {
@@ -24,10 +27,29 @@ struct ChatView: View {
                 MessageInputBar(
                     messageText: $messageText,
                     onSend: sendMessage,
+                    onAttachImage: { showingImageSourcePicker = true }
                 )
             }
             .navigationTitle("CrewChat")
             .navigationBarTitleDisplayMode(.inline)
+        }
+        .confirmationDialog("Choose Image Source", isPresented: $showingImageSourcePicker) {
+            Button("Photo Library") {
+                imagePickerSourceType = .photoLibrary
+                showingImagePicker = true
+            }
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Button("Camera") {
+                    imagePickerSourceType = .camera
+                    showingImagePicker = true
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(sourceType: imagePickerSourceType) { image in
+                handleSelectedImage(image)
+            }
         }
         .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
             Button("OK") {
@@ -96,6 +118,13 @@ struct ChatView: View {
         let text = messageText
         messageText = ""
         viewModel.sendMessage(text)
+    }
+    
+    private func handleSelectedImage(_ image: UIImage) {
+        // Save image and send as file message
+        if let result = ImageStorageService.shared.saveImage(image) {
+            viewModel.sendImageMessage(path: result.path, size: result.size)
+        }
     }
     
     private func scrollToBottom(proxy: ScrollViewProxy) {

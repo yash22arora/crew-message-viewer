@@ -11,6 +11,7 @@ import SwiftUI
 struct MessageInputBar: View {
     @Binding var messageText: String
     var onSend: () -> Void
+    var onAttachImage: () -> Void
     
     private var canSend: Bool {
         !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -18,6 +19,12 @@ struct MessageInputBar: View {
     
     var body: some View {
         HStack(spacing: 12) {
+            // Attachment button
+            Button(action: onAttachImage) {
+                Image(systemName: "photo.on.rectangle.angled")
+                    .font(.system(size: 22))
+                    .foregroundColor(.blue)
+            }
             
             // Text field
             TextField("Type a message...", text: $messageText, axis: .vertical)
@@ -50,6 +57,7 @@ struct MessageInputBar: View {
         MessageInputBar(
             messageText: .constant(""),
             onSend: {},
+            onAttachImage: {}
         )
     }
 }
