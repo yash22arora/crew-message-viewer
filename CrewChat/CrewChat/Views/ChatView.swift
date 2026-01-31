@@ -66,19 +66,24 @@ struct ChatView: View {
     
     @ViewBuilder
     private var messagesList: some View {
-        if viewModel.messages.isEmpty {
+        if viewModel.messages.isEmpty && !viewModel.isAgentTyping {
             emptyStateView
         } else {
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(spacing: 12) {
+                    LazyVStack(spacing: 4) {
                         ForEach(viewModel.messages) { message in
                             MessageBubbleView(message: message)
                                 .id(message.id)
                         }
+                        
+                        // Typing indicator
+                        if viewModel.isAgentTyping {
+                            typingIndicator
+                                .id("typing-indicator")
+                        }
                     }
                     .padding(.horizontal)
-                    .padding(.vertical, 8)
                 }
                 .onAppear {
                     scrollToBottom(proxy: proxy)
@@ -88,8 +93,35 @@ struct ChatView: View {
                         scrollToBottom(proxy: proxy)
                     }
                 }
+                .onChange(of: viewModel.isAgentTyping) { _, isTyping in
+                    if isTyping {
+                        withAnimation {
+                            proxy.scrollTo("typing-indicator", anchor: .bottom)
+                        }
+                    }
+                }
             }
         }
+    }
+    
+    private var typingIndicator: some View {
+        HStack {
+            HStack(spacing: 4) {
+                ForEach(0..<3) { index in
+                    Circle()
+                        .fill(Color.secondary)
+                        .frame(width: 8, height: 8)
+                        .opacity(0.6)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.systemGray5))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            
+            Spacer()
+        }
+        .padding(.vertical, 8)
     }
     
     // MARK: - Empty State

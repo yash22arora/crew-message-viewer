@@ -52,6 +52,7 @@ struct MessageBubbleView: View {
                 Spacer(minLength: 60)
             }
         }
+        .padding(.vertical, 8)
     }
     
     @ViewBuilder

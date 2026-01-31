@@ -14,16 +14,19 @@ final class ChatViewModel: ObservableObject {
     
     @Published private(set) var messages: [Message] = []
     @Published var isLoading: Bool = false
+    @Published var isAgentTyping: Bool = false
     @Published var errorMessage: String?
     
     // MARK: - Dependencies
     private let persistenceService: PersistenceService
     private let seedDataLoader: SeedDataLoader
+    private let dataManager: ChatDataManaging
     
     init(persistenceService: PersistenceService = .shared,
          seedDataLoader: SeedDataLoader = .shared) {
         self.persistenceService = persistenceService
         self.seedDataLoader = seedDataLoader
+        self.dataManager = ChatDataManager()
         
         loadMessages()
     }
@@ -50,6 +53,9 @@ final class ChatViewModel: ObservableObject {
         
         let newMessage = Message.textMessage(text.trimmingCharacters(in: .whitespacesAndNewlines), sender: .user)
         addMessage(newMessage)
+        
+        // Fetch agent response asynchronously
+        fetchAgentResponse()
     }
     
     /// Add an image message from the user
@@ -65,6 +71,9 @@ final class ChatViewModel: ObservableObject {
             sender: .user
         )
         addMessage(newMessage)
+        
+        // Fetch agent response asynchronously
+        fetchAgentResponse()
     }
     
     // MARK: - Private Methods
@@ -81,6 +90,18 @@ final class ChatViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to save messages: \(error.localizedDescription)"
             print("[ChatViewModel] Error persisting messages: \(error)")
+        }
+    }
+    
+    @MainActor
+    private func fetchAgentResponse() {
+        Task {
+            isAgentTyping = true
+            
+            let response = await dataManager.fetchAgentResponse()
+            
+            isAgentTyping = false
+            addMessage(response)
         }
     }
 }
