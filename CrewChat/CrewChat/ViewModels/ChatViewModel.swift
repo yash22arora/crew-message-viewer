@@ -12,6 +12,7 @@ import Combine
 /// ViewModel for managing chat messages and state
 final class ChatViewModel: ObservableObject {
     
+    let chat: Chat
     @Published private(set) var messages: [Message] = []
     @Published var isLoading: Bool = false
     @Published var isAgentTyping: Bool = false
@@ -22,8 +23,9 @@ final class ChatViewModel: ObservableObject {
     private let seedDataLoader: SeedDataLoader
     private let dataManager: ChatDataManaging
     
-    init(persistenceService: PersistenceService = .shared,
+    init(chat: Chat, persistenceService: PersistenceService = .shared,
          seedDataLoader: SeedDataLoader = .shared) {
+        self.chat = chat
         self.persistenceService = persistenceService
         self.seedDataLoader = seedDataLoader
         self.dataManager = ChatDataManager()

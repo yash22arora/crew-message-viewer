@@ -9,33 +9,35 @@ import SwiftUI
 
 /// Main chat view displaying messages and input bar
 struct ChatView: View {
-    @StateObject private var viewModel = ChatViewModel()
+    @StateObject private var viewModel: ChatViewModel
     @State private var messageText = ""
     @State private var showingImagePicker = false
     @State private var showingImageSourcePicker = false
     @State private var imagePickerSourceType: UIImagePickerController.SourceType = .photoLibrary
     
+    init(chat: Chat) {
+        _viewModel = StateObject(wrappedValue: ChatViewModel(chat: chat))
+    }
+    
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Messages list
-                messagesList
-                
-                Divider()
-                
-                // Input bar
-                MessageInputBar(
-                    messageText: $messageText,
-                    onSend: sendMessage,
-                    onAttachImage: { showingImageSourcePicker = true }
-                )
-            }
-            .onTapGesture {
-                dismissKeyboard()
-            }
-            .navigationTitle("CrewChat")
-            .navigationBarTitleDisplayMode(.inline)
+        VStack(spacing: 0) {
+            // Messages list
+            messagesList
+            
+            Divider()
+            
+            // Input bar
+            MessageInputBar(
+                messageText: $messageText,
+                onSend: sendMessage,
+                onAttachImage: { showingImageSourcePicker = true }
+            )
         }
+        .onTapGesture {
+            dismissKeyboard()
+        }
+        .navigationTitle(viewModel.chat.label)
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingImageSourcePicker) {
             ImageSourcePickerSheet { sourceType in
                 handleImageSourceSelection(sourceType)
@@ -177,5 +179,7 @@ struct ChatView: View {
 }
 
 #Preview {
-    ChatView()
+    NavigationStack {
+        ChatView(chat: .init(id: "test-chat", label: "Test Chat", createdAt: Date()))
+    }
 }
