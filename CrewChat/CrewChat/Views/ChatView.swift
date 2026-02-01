@@ -127,10 +127,7 @@ struct ChatView: View {
         HStack {
             HStack(spacing: 4) {
                 ForEach(0..<3) { index in
-                    Circle()
-                        .fill(Color.secondary)
-                        .frame(width: 8, height: 8)
-                        .opacity(0.6)
+                    TypingDot(delay: Double(index) * 0.3)
                 }
             }
             .padding(.horizontal, 16)
@@ -195,6 +192,32 @@ struct ChatView: View {
     
     private func dismissKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+// MARK: - Typing Dot Animation
+
+private struct TypingDot: View {
+    let delay: Double
+    
+    @State private var isAnimating = false
+    
+    var body: some View {
+        Circle()
+            .fill(Color.secondary)
+            .frame(width: 8, height: 8)
+            .scaleEffect(isAnimating ? 1.0 : 0.5)
+            .opacity(isAnimating ? 1.0 : 0.4)
+            .animation(
+                Animation
+                    .easeInOut(duration: 0.6)
+                    .repeatForever(autoreverses: true)
+                    .delay(delay),
+                value: isAnimating
+            )
+            .onAppear {
+                isAnimating = true
+            }
     }
 }
 
