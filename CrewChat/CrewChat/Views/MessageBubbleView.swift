@@ -43,7 +43,7 @@ struct MessageBubbleView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                 
                 // Timestamp
-                Text(DateFormatters.formatTime(from: message.timestamp))
+                Text(DateFormatters.formatSmartTimestamp(from: message.timestamp))
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
