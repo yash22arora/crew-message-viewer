@@ -30,6 +30,9 @@ struct ChatView: View {
                     onAttachImage: { showingImageSourcePicker = true }
                 )
             }
+            .onTapGesture {
+                dismissKeyboard()
+            }
             .navigationTitle("CrewChat")
             .navigationBarTitleDisplayMode(.inline)
         }
@@ -79,6 +82,7 @@ struct ChatView: View {
                     }
                     .padding(.horizontal)
                 }
+                .scrollDismissesKeyboard(.interactively)
                 .onAppear {
                     scrollToBottom(proxy: proxy)
                 }
@@ -165,6 +169,10 @@ struct ChatView: View {
         if let lastMessage = viewModel.messages.last {
             proxy.scrollTo(lastMessage.id, anchor: .bottom)
         }
+    }
+    
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 
