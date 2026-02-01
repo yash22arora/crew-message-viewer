@@ -18,8 +18,8 @@ final class PersistenceService {
         fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
     
-    private var messagesFileURL: URL {
-        documentsDirectory.appendingPathComponent(Constants.Files.messagesFileName)
+    private var chatsFileURL: URL {
+        documentsDirectory.appendingPathComponent(Constants.Files.chatsFileName)
     }
     
     var imagesDirectory: URL {
@@ -30,34 +30,106 @@ final class PersistenceService {
         createImagesDirectoryIfNeeded()
     }
     
-    // MARK: - Public Methods
+    // MARK: - Messages File URL
     
-    /// Save messages to local JSON file
-    /// - Parameter messages: Array of messages to save
-    /// - Throws: Encoding or file write errors
-    func saveMessages(_ messages: [Message]) throws {
+    private func messagesFileURL(for chatId: String) -> URL {
+        documentsDirectory.appendingPathComponent(Constants.Files.messagesFileName(for: chatId))
+    }
+    
+    // MARK: - Chat Persistence
+    
+    /// Load chats from local JSON file, or create default chat if none exist
+    /// - Returns: Array of chats
+    func loadOrCreateDefaultChats() -> [Chat] {
+        // Try to load existing chats
+        if let chats = loadChats(), !chats.isEmpty {
+            return chats
+        }
+        
+        // Create default chat
+        let defaultChat = Chat(
+            id: Constants.DefaultChat.id,
+            label: Constants.DefaultChat.label,
+            createdAt: Date()
+        )
+        
+        // Save and return
+        try? saveChats([defaultChat])
+        return [defaultChat]
+    }
+    
+    /// Save chats to local JSON file
+    func saveChats(_ chats: [Chat]) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        encoder.dateEncodingStrategy = .iso8601
+        
+        let data = try encoder.encode(chats)
+        try data.write(to: chatsFileURL, options: [.atomicWrite])
+        
+        print("[PersistenceService] Saved \(chats.count) chats to disk")
+    }
+    
+    /// Load chats from local JSON file
+    func loadChats() -> [Chat]? {
+        guard fileManager.fileExists(atPath: chatsFileURL.path) else {
+            return nil
+        }
+        
+        do {
+            let data = try Data(contentsOf: chatsFileURL)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode([Chat].self, from: data)
+        } catch {
+            print("[PersistenceService] Error loading chats: \(error.localizedDescription)")
+            return nil
+        }
+    }
+    
+    /// Create a new chat and add to storage
+    func createChat(label: String) -> Chat {
+        var chats = loadChats() ?? []
+        
+        let newChat = Chat(
+            id: UUID().uuidString,
+            label: label,
+            createdAt: Date()
+        )
+        
+        chats.append(newChat)
+        try? saveChats(chats)
+        
+        return newChat
+    }
+    
+    // MARK: - Message Persistence
+    
+    /// Save messages for a specific chat
+    func saveMessages(_ messages: [Message], for chatId: String) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         
         let data = try encoder.encode(messages)
-        try data.write(to: messagesFileURL, options: [.atomicWrite])
+        try data.write(to: messagesFileURL(for: chatId), options: [.atomicWrite])
         
-        print("[PersistenceService] Saved \(messages.count) messages to disk")
+        print("[PersistenceService] Saved \(messages.count) messages for chat \(chatId)")
     }
     
-    /// Load messages from local JSON file
-    /// - Returns: Array of messages, or empty array if file doesn't exist
-    func loadMessages() -> [Message] {
-        guard fileManager.fileExists(atPath: messagesFileURL.path) else {
-            print("[PersistenceService] No messages file found")
+    /// Load messages for a specific chat
+    func loadMessages(for chatId: String) -> [Message] {
+        let fileURL = messagesFileURL(for: chatId)
+        
+        guard fileManager.fileExists(atPath: fileURL.path) else {
+            print("[PersistenceService] No messages file found for chat \(chatId)")
             return []
         }
         
         do {
-            let data = try Data(contentsOf: messagesFileURL)
+            let data = try Data(contentsOf: fileURL)
             let decoder = JSONDecoder()
             let messages = try decoder.decode([Message].self, from: data)
-            print("[PersistenceService] Loaded \(messages.count) messages from disk")
+            print("[PersistenceService] Loaded \(messages.count) messages for chat \(chatId)")
             return messages
         } catch {
             print("[PersistenceService] Error loading messages: \(error.localizedDescription)")
@@ -65,16 +137,17 @@ final class PersistenceService {
         }
     }
     
-    /// Check if messages file exists
-    var hasPersistedMessages: Bool {
-        fileManager.fileExists(atPath: messagesFileURL.path)
+    /// Check if messages file exists for a chat
+    func hasPersistedMessages(for chatId: String) -> Bool {
+        fileManager.fileExists(atPath: messagesFileURL(for: chatId).path)
     }
     
-    /// Delete all persisted messages (for testing/reset)
-    func deleteAllMessages() throws {
-        if fileManager.fileExists(atPath: messagesFileURL.path) {
-            try fileManager.removeItem(at: messagesFileURL)
-            print("[PersistenceService] Deleted messages file")
+    /// Delete messages for a specific chat
+    func deleteMessages(for chatId: String) throws {
+        let fileURL = messagesFileURL(for: chatId)
+        if fileManager.fileExists(atPath: fileURL.path) {
+            try fileManager.removeItem(at: fileURL)
+            print("[PersistenceService] Deleted messages for chat \(chatId)")
         }
     }
     
@@ -91,3 +164,4 @@ final class PersistenceService {
         }
     }
 }
+

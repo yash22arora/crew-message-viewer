@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// Loads predefined seed messages on first app launch
+/// Loads predefined seed messages on first app launch for the default chat
 final class SeedDataLoader {
     
     static let shared = SeedDataLoader()
@@ -17,21 +17,29 @@ final class SeedDataLoader {
     
     private init() {}
     
-    /// Load seed data if not already loaded
-    /// - Returns: Array of seed messages if this is first launch, nil otherwise
+    /// Load seed data for a specific chat if not already loaded
+    /// Only seeds default chat (Constants.DefaultChat.id)
+    /// - Parameter chatId: The chat ID to potentially seed
+    /// - Returns: Array of seed messages if this is first launch for this chat, nil otherwise
     @discardableResult
-    func loadSeedDataIfNeeded() -> [Message]? {
-        guard !hasLoadedSeedData else {
-            print("[SeedDataLoader] Seed data already loaded, skipping")
+    func loadSeedDataIfNeeded(for chatId: String) -> [Message]? {
+        // Only seed the default chat
+        guard chatId == Constants.DefaultChat.id else {
+            print("[SeedDataLoader] Not default chat, skipping seed data")
+            return nil
+        }
+        
+        guard !hasLoadedSeedData(for: chatId) else {
+            print("[SeedDataLoader] Seed data already loaded for chat \(chatId), skipping")
             return nil
         }
         
         let seedMessages = fetchSeedMessages()
         
         do {
-            try persistenceService.saveMessages(seedMessages)
-            markSeedDataAsLoaded()
-            print("[SeedDataLoader] Successfully loaded \(seedMessages.count) seed messages")
+            try persistenceService.saveMessages(seedMessages, for: chatId)
+            markSeedDataAsLoaded(for: chatId)
+            print("[SeedDataLoader] Successfully loaded \(seedMessages.count) seed messages for chat \(chatId)")
             return seedMessages
         } catch {
             print("[SeedDataLoader] Error saving seed messages: \(error.localizedDescription)")
@@ -39,19 +47,18 @@ final class SeedDataLoader {
         }
     }
     
-    /// Check if seed data has been loaded previously
-    var hasLoadedSeedData: Bool {
-        userDefaults.bool(forKey: Constants.UserDefaultsKeys.hasLoadedSeedData)
+    /// Check if seed data has been loaded for a specific chat
+    func hasLoadedSeedData(for chatId: String) -> Bool {
+        userDefaults.bool(forKey: Constants.UserDefaultsKeys.hasLoadedSeedData(for: chatId))
     }
     
-    /// Reset seed data flag (for testing)
-    func resetSeedDataFlag() {
-        userDefaults.set(false, forKey: Constants.UserDefaultsKeys.hasLoadedSeedData)
+    /// Reset seed data flag for a specific chat (for testing)
+    func resetSeedDataFlag(for chatId: String) {
+        userDefaults.set(false, forKey: Constants.UserDefaultsKeys.hasLoadedSeedData(for: chatId))
     }
     
-    
-    private func markSeedDataAsLoaded() {
-        userDefaults.set(true, forKey: Constants.UserDefaultsKeys.hasLoadedSeedData)
+    private func markSeedDataAsLoaded(for chatId: String) {
+        userDefaults.set(true, forKey: Constants.UserDefaultsKeys.hasLoadedSeedData(for: chatId))
     }
     
     private func fetchSeedMessages() -> [Message] {
@@ -71,3 +78,4 @@ final class SeedDataLoader {
         }
     }
 }
+

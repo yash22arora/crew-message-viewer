@@ -1,5 +1,5 @@
 //
-//  ChatDataManager.swift
+//  MessagesDataManager.swift
 //  CrewChat
 //
 //  Created by Yashvardhan Arora on 01/02/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ChatDataManaging {
+protocol MessagesDataManaging {
     func fetchAgentResponse() async -> Message
 }
 
@@ -35,7 +35,7 @@ fileprivate let dummyResponses: [String] = [
 ]
 
 /// Service for fetching simulated agent responses
-final class ChatDataManager: ChatDataManaging {
+final class MessagesDataManager: MessagesDataManaging {
     
     /// Fetch a simulated agent response with artificial delay
     /// - Returns: A randomly selected agent response message

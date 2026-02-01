@@ -7,12 +7,9 @@
 
 import SwiftUI
 
-fileprivate var chats: [Chat] = [
-    .init(id: UUID().uuidString, label: "Mumbai Trip", createdAt: Date())
-]
-
 struct HomeView: View {
     
+    @StateObject private var viewModel = HomeViewModel()
     @State private var path = NavigationPath()
     
     var body: some View {
@@ -26,6 +23,9 @@ struct HomeView: View {
             }
             .navigationDestination(for: Chat.self) { chat in
                 ChatView(chat: chat)
+            }
+            .onAppear {
+                viewModel.loadChats()
             }
         }
     }
@@ -62,7 +62,7 @@ struct HomeView: View {
     private var chatsList: some View {
         List {
             Section("Chats") {
-                ForEach(chats) { chat in
+                ForEach(viewModel.chats) { chat in
                     NavigationLink(value: chat) {
                         Text(chat.label)
                             .padding(8)
@@ -73,3 +73,5 @@ struct HomeView: View {
         .scrollBounceBehavior(.basedOnSize)
     }
 }
+
+

@@ -21,14 +21,14 @@ final class ChatViewModel: ObservableObject {
     // MARK: - Dependencies
     private let persistenceService: PersistenceService
     private let seedDataLoader: SeedDataLoader
-    private let dataManager: ChatDataManaging
+    private let dataManager: MessagesDataManaging
     
     init(chat: Chat, persistenceService: PersistenceService = .shared,
          seedDataLoader: SeedDataLoader = .shared) {
         self.chat = chat
         self.persistenceService = persistenceService
         self.seedDataLoader = seedDataLoader
-        self.dataManager = ChatDataManager()
+        self.dataManager = MessagesDataManager()
         
         loadMessages()
     }
@@ -37,12 +37,12 @@ final class ChatViewModel: ObservableObject {
     func loadMessages() {
         isLoading = true
         
-        // First, try to load seed data if this is first launch
-        if let seedMessages = seedDataLoader.loadSeedDataIfNeeded() {
+        // First, try to load seed data if this is the default chat and first launch
+        if let seedMessages = seedDataLoader.loadSeedDataIfNeeded(for: chat.id) {
             messages = seedMessages.sorted { $0.timestamp < $1.timestamp }
         } else {
-            // Load from persistence
-            messages = persistenceService.loadMessages().sorted { $0.timestamp < $1.timestamp }
+            // Load from persistence for this specific chat
+            messages = persistenceService.loadMessages(for: chat.id).sorted { $0.timestamp < $1.timestamp }
         }
         
         isLoading = false
@@ -88,7 +88,7 @@ final class ChatViewModel: ObservableObject {
     
     private func persistMessages() {
         do {
-            try persistenceService.saveMessages(messages)
+            try persistenceService.saveMessages(messages, for: chat.id)
         } catch {
             errorMessage = "Failed to save messages: \(error.localizedDescription)"
             print("[ChatViewModel] Error persisting messages: \(error)")
