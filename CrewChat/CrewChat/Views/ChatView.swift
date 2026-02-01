@@ -14,6 +14,7 @@ struct ChatView: View {
     @State private var showingImagePicker = false
     @State private var showingImageSourcePicker = false
     @State private var imagePickerSourceType: UIImagePickerController.SourceType = .photoLibrary
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     
     init(chat: Chat) {
         _viewModel = StateObject(wrappedValue: ChatViewModel(chat: chat))
@@ -98,6 +99,11 @@ struct ChatView: View {
                         withAnimation {
                             proxy.scrollTo("typing-indicator", anchor: .bottom)
                         }
+                    }
+                }
+                .onChange(of: verticalSizeClass) { _, _ in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        scrollToBottom(proxy: proxy)
                     }
                 }
             }
