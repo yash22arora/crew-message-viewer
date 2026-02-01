@@ -41,6 +41,15 @@ struct MessageBubbleView: View {
                     .background(bubbleColor)
                     .foregroundColor(textColor)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .contextMenu {
+                        if message.type == .text {
+                            copyButton
+                        }
+                        
+                        // Can add more options here like:
+                        // Button { } label: { Label("Reply", systemImage: "arrowshape.turn.up.left") }
+                        // Button(role: .destructive) { } label: { Label("Delete", systemImage: "trash") }
+                    }
                 
                 // Timestamp
                 Text(DateFormatters.formatSmartTimestamp(from: message.timestamp))
@@ -63,6 +72,26 @@ struct MessageBubbleView: View {
         case .file:
             ImageMessageView(message: message)
         }
+    }
+    
+    private var copyButton: some View {
+        Button {
+            copyMessageText()
+        } label: {
+            Label("Copy", systemImage: "doc.on.doc")
+        }
+    }
+    
+    private func copyMessageText() {
+        guard message.type == .text else { return }
+        let text = message.message
+        
+        // Copy to clipboard
+        UIPasteboard.general.string = text
+        
+        // Haptic feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
     }
 }
 
