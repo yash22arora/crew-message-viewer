@@ -9,9 +9,16 @@ import SwiftUI
 
 // MARK: - Image Source Type Enum
 
-enum ImageSourceType {
+enum ImageSourceType: Identifiable {
     case camera
     case photoLibrary
+    
+    var id: String {
+        switch self {
+        case .camera: return "camera"
+        case .photoLibrary: return "photoLibrary"
+        }
+    }
     
     var uiImagePickerSourceType: UIImagePickerController.SourceType {
         switch self {
@@ -23,11 +30,6 @@ enum ImageSourceType {
     }
 }
 
-// MARK: - Delegate Protocol
-
-protocol ImageSourcePickerDelegate: AnyObject {
-    func imageSourcePicker(didSelect sourceType: ImageSourceType)
-}
 
 // MARK: - Image Source Picker Sheet
 
@@ -43,18 +45,12 @@ struct ImageSourcePickerSheet: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            // Handle bar indicator
-            Capsule()
-                .fill(Color(.systemGray4))
-                .frame(width: 36, height: 5)
-                .padding(.vertical, 8)
             
             Text("Choose Image Source")
                 .font(.headline)
-                .padding(.top, 16)
-                .padding(.bottom, 24)
+                .padding(.vertical, 24)
             
-            HStack(spacing: 32) {
+            HStack(spacing: 64) {
                 // Photo Library option
                 SourceOptionButton(
                     icon: "photo.on.rectangle",

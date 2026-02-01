@@ -11,9 +11,8 @@ import SwiftUI
 struct ChatView: View {
     @StateObject private var viewModel: ChatViewModel
     @State private var messageText = ""
-    @State private var showingImagePicker = false
     @State private var showingImageSourcePicker = false
-    @State private var imagePickerSourceType: UIImagePickerController.SourceType = .photoLibrary
+    @State private var selectedImageSource: ImageSourceType? = nil
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     
     init(chat: Chat) {
@@ -43,11 +42,11 @@ struct ChatView: View {
             ImageSourcePickerSheet { sourceType in
                 handleImageSourceSelection(sourceType)
             }
-            .presentationDetents([.height(200)])
+            .presentationDetents([.height(300)])
             .presentationDragIndicator(.visible)
         }
-        .sheet(isPresented: $showingImagePicker) {
-            ImagePicker(sourceType: imagePickerSourceType) { image in
+        .sheet(item: $selectedImageSource) { sourceType in
+            ImagePicker(sourceType: sourceType.uiImagePickerSourceType) { image in
                 handleSelectedImage(image)
             }
         }
@@ -174,9 +173,10 @@ struct ChatView: View {
     
     private func handleImageSourceSelection(_ sourceType: ImageSourceType) {
         showingImageSourcePicker = false
-        imagePickerSourceType = sourceType.uiImagePickerSourceType
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            showingImagePicker = true
+        
+        // Use asyncAfter to ensure the source picker sheet is fully dismissed
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            selectedImageSource = sourceType
         }
     }
     
