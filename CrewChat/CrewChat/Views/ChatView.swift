@@ -106,6 +106,20 @@ struct ChatView: View {
                         scrollToBottom(proxy: proxy)
                     }
                 }
+                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation {
+                            scrollToBottom(proxy: proxy)
+                        }
+                    }
+                }
+                .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.0) {
+                        withAnimation {
+                            scrollToBottom(proxy: proxy)
+                        }
+                    }
+                }
             }
         }
     }
