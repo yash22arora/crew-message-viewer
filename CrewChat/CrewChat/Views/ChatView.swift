@@ -13,6 +13,7 @@ struct ChatView: View {
     @State private var messageText = ""
     @State private var showingImageSourcePicker = false
     @State private var selectedImageSource: ImageSourceType? = nil
+    @State private var pendingImage: UIImage? = nil
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     
     init(chat: Chat) {
@@ -26,9 +27,17 @@ struct ChatView: View {
             
             Divider()
             
+            // Image preview (if pending)
+            if let image = pendingImage {
+                ImagePreviewBarView(image: image) {
+                    discardPendingImage()
+                }
+            }
+            
             // Input bar
             MessageInputBar(
                 messageText: $messageText,
+                hasImageAttached: pendingImage != nil,
                 onSend: sendMessage,
                 onAttachImage: { showingImageSourcePicker = true }
             )
@@ -105,8 +114,13 @@ struct ChatView: View {
                         scrollToBottom(proxy: proxy)
                     }
                 }
+                .onChange(of: pendingImage) { _, _ in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.0) {
+                        scrollToBottom(proxy: proxy)
+                    }
+                }
                 .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
                         withAnimation {
                             scrollToBottom(proxy: proxy)
                         }
@@ -163,9 +177,15 @@ struct ChatView: View {
     // MARK: - Actions
     
     private func sendMessage() {
-        let text = messageText
-        messageText = ""
-        viewModel.sendMessage(text)
+        
+        if pendingImage != nil {
+            sendImageWithCaption()
+        }
+        else {
+            let text = messageText
+            messageText = ""
+            viewModel.sendMessage(text)
+        }
     }
     
     private func handleImageSourceSelection(_ sourceType: ImageSourceType) {
@@ -178,10 +198,26 @@ struct ChatView: View {
     }
     
     private func handleSelectedImage(_ image: UIImage) {
-        // Save image and send as file message
+        // Store image for preview, don't send yet
+        pendingImage = image
+    }
+    
+    private func sendImageWithCaption() {
+        guard let image = pendingImage else { return }
+        
+        // Save image and send as file message with caption
         if let result = ImageStorageService.shared.saveImage(image) {
-            viewModel.sendImageMessage(path: result.path, size: result.size)
+            let caption = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+            viewModel.sendImageMessage(path: result.path, size: result.size, caption: caption)
         }
+        
+        // Clear pending image and text
+        pendingImage = nil
+        messageText = ""
+    }
+    
+    private func discardPendingImage() {
+        pendingImage = nil
     }
     
     private func scrollToBottom(proxy: ScrollViewProxy) {

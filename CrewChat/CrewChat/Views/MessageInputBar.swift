@@ -10,11 +10,12 @@ import SwiftUI
 /// Input bar for composing and sending messages
 struct MessageInputBar: View {
     @Binding var messageText: String
+    var hasImageAttached: Bool
     var onSend: () -> Void
     var onAttachImage: () -> Void
     
     private var canSend: Bool {
-        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        hasImageAttached || !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     var body: some View {
@@ -56,6 +57,7 @@ struct MessageInputBar: View {
         Spacer()
         MessageInputBar(
             messageText: .constant(""),
+            hasImageAttached: false,
             onSend: {},
             onAttachImage: {}
         )
