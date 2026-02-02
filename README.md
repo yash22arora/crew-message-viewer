@@ -110,18 +110,72 @@ CrewChat/
 
 ## Data Flow
 
-### Message Sending
+### Text Message Flow
 
-```
-User types → MessageInputBar → ChatViewModel.sendMessage()
-  → Message created → PersistenceService.saveMessages()
-  → MessagesDataManager.fetchAgentResponse() → Agent reply added
+```mermaid
+sequenceDiagram
+    participant User
+    participant MessageInputBar
+    participant ChatViewModel
+    participant PersistenceService
+    participant MessagesDataManager
+
+    User->>MessageInputBar: Types message
+    User->>MessageInputBar: Taps Send
+    MessageInputBar->>ChatViewModel: sendMessage(text)
+    ChatViewModel->>ChatViewModel: Create Message object
+    ChatViewModel->>PersistenceService: saveMessages(for: chatId)
+    PersistenceService-->>ChatViewModel: Success
+    ChatViewModel->>MessagesDataManager: fetchAgentResponse()
+    Note over MessagesDataManager: Simulated delay (0.5-2.5s)
+    MessagesDataManager-->>ChatViewModel: Agent Message
+    ChatViewModel->>PersistenceService: saveMessages(for: chatId)
 ```
 
-### Image Sending
+### Image Message Flow
 
+```mermaid
+sequenceDiagram
+    participant User
+    participant ChatView
+    participant ImagePicker
+    participant ImagePreviewBar
+    participant ImageStorageService
+    participant ChatViewModel
+
+    User->>ChatView: Taps attachment button
+    ChatView->>ChatView: Show ImageSourcePicker
+    User->>ChatView: Selects Camera/Library
+    ChatView->>ImagePicker: Present picker
+    User->>ImagePicker: Selects image
+    ImagePicker->>ChatView: handleSelectedImage(image)
+    ChatView->>ChatView: pendingImage = image
+    ChatView->>ImagePreviewBar: Show preview
+    User->>ChatView: Types caption (optional)
+    User->>ChatView: Taps Send
+    ChatView->>ImageStorageService: saveImage(image)
+    ImageStorageService-->>ChatView: (path, size)
+    ChatView->>ChatViewModel: sendImageMessage(path, size, caption)
+    ChatViewModel->>ChatViewModel: Create Message object
+    Note over ChatView: Clear pendingImage
 ```
-User picks image → pendingImage state → Preview bar shown
-  → User adds caption (optional) → Send tapped
-  → ImageStorageService.saveImage() → ChatViewModel.sendImageMessage()
+
+### App Launch Flow
+
+```mermaid
+flowchart TD
+    A[App Launch] --> B{chats.json exists?}
+    B -->|No| C[Create default Mumbai Trip chat]
+    C --> D[Save to chats.json]
+    D --> E[HomeView displays chats]
+    B -->|Yes| E
+    E --> F[User taps chat]
+    F --> G[ChatView opens]
+    G --> H{Is default chat?}
+    H -->|Yes| I{Seed data loaded?}
+    I -->|No| J[Load SeedMessages.json]
+    J --> K[Save to chatId_messages.json]
+    K --> L[Display messages]
+    I -->|Yes| L
+    H -->|No| L
 ```
