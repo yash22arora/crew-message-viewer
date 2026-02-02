@@ -6,6 +6,8 @@ A SwiftUI-based chat interface app with support for text and image messages, bui
 ![Platform](https://img.shields.io/badge/Platform-iOS%2018.6+-blue.svg)
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM-green.svg)
 
+> App Walkthrough Videos - https://drive.google.com/drive/folders/1l-ZqwWiFrwYOsPKd40sPfcgD90_j42Vr?usp=sharing
+
 ## Setup Instructions
 
 ### Requirements
@@ -87,13 +89,13 @@ graph TB
 
 ### Layer Responsibilities
 
-| Layer | Responsibility |
-|-------|----------------|
-| **Views** | UI rendering, user interaction, state binding |
-| **ViewModels** | Business logic, state management, data transformation |
-| **DataManagers** | Data access abstraction, protocol-based for testability |
-| **Services** | Low-level I/O operations, file system access, image processing |
-| **Storage** | JSON files for persistence, Images directory for media |
+| Layer            | Responsibility                                                 |
+| ---------------- | -------------------------------------------------------------- |
+| **Views**        | UI rendering, user interaction, state binding                  |
+| **ViewModels**   | Business logic, state management, data transformation          |
+| **DataManagers** | Data access abstraction, protocol-based for testability        |
+| **Services**     | Low-level I/O operations, file system access, image processing |
+| **Storage**      | JSON files for persistence, Images directory for media         |
 
 ### Key Design Decisions
 
@@ -148,7 +150,6 @@ CrewChat/
 └── CrewChatApp.swift               # App entry point
 ```
 
-
 ---
 
 ## Features
@@ -158,6 +159,7 @@ CrewChat/
 - ✅ Text and image message support
 - ✅ Optional Caption for images
 - ✅ Image picking from Camera and Photo Library
+- ✅ Full-screen zoomable image viewer
 - ✅ Chronological message display with smart timestamps
 - ✅ Message persistence to local JSON storage
 - ✅ Seed data on first launch (for default chat)
