@@ -34,25 +34,66 @@ On first launch, the app creates a default "Mumbai Trip" chat with seed messages
 
 ### MVVM + DataManager Pattern
 
+```mermaid
+graph TB
+    subgraph Views["📱 Views Layer"]
+        HV[HomeView]
+        CV[ChatView]
+        MBV[MessageBubbleView]
+        IMV[ImageMessageView]
+        MIB[MessageInputBar]
+    end
+
+    subgraph ViewModels["🧠 ViewModels Layer"]
+        HVM[HomeViewModel]
+        CVM[ChatViewModel]
+    end
+
+    subgraph DataManagers["📊 DataManagers Layer"]
+        CDM[ChatsDataManager]
+        MDM[MessagesDataManager]
+    end
+
+    subgraph Services["⚙️ Services Layer"]
+        PS[PersistenceService]
+        SDL[SeedDataLoader]
+        ISS[ImageStorageService]
+    end
+
+    subgraph Storage["💾 Storage Layer"]
+        CJ[(chats.json)]
+        MJ[(chatId_messages.json)]
+        IMG[(Images/)]
+    end
+
+    HV --> HVM
+    CV --> CVM
+    CV --> MBV
+    MBV --> IMV
+    CV --> MIB
+
+    HVM --> CDM
+    CVM --> MDM
+
+    CDM --> PS
+    MDM --> PS
+    SDL --> PS
+    CVM --> ISS
+
+    PS --> CJ
+    PS --> MJ
+    ISS --> IMG
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         Views                                │
-│  HomeView ──────────────────────── ChatView                 │
-│      │                                 │                     │
-│      ▼                                 ▼                     │
-│  HomeViewModel                    ChatViewModel              │
-│      │                                 │                     │
-│      ▼                                 ▼                     │
-│  ChatsDataManager               MessagesDataManager          │
-│      │                                 │                     │
-│      └────────────┬────────────────────┘                     │
-│                   ▼                                          │
-│           PersistenceService                                 │
-│                   │                                          │
-│                   ▼                                          │
-│            Local JSON Files                                  │
-└─────────────────────────────────────────────────────────────┘
-```
+
+### Layer Responsibilities
+
+| Layer | Responsibility |
+|-------|----------------|
+| **Views** | UI rendering, user interaction, state binding |
+| **ViewModels** | Business logic, state management, data transformation |
+| **DataManagers** | Data access abstraction, protocol-based for testability |
+| **Services** | Low-level I/O operations, file system access, image processing |
+| **Storage** | JSON files for persistence, Images directory for media |
 
 ### Key Design Decisions
 
@@ -68,14 +109,45 @@ On first launch, the app creates a default "Mumbai Trip" chat with seed messages
 
 ```
 CrewChat/
-├── Models/           # Data models (Message, Chat, FileInfo)
-├── Views/            # SwiftUI views
-├── ViewModels/       # Observable ViewModels
-├── Services/         # Persistence, SeedDataLoader, ImageStorage
-├── DataManager/      # Data access layer protocols & implementations
-├── Utilities/        # Constants, DateFormatters
-└── Resources/        # SeedMessages.json, Assets
+├── 📱 Views/
+│   ├── HomeView.swift              # Chat list screen
+│   ├── ChatView.swift              # Main chat interface
+│   ├── MessageBubbleView.swift     # Message container with context menu
+│   ├── TextMessageView.swift       # Text message content
+│   ├── ImageMessageView.swift      # Image message with async loading
+│   ├── FullScreenImageView.swift   # Zoomable image viewer
+│   ├── MessageInputBar.swift       # Text input with send button
+│   ├── ImagePicker.swift           # Camera/Library picker wrapper
+│   ├── ImageSourcePickerSheet.swift# Bottom sheet for image source
+│   └── ImagePreviewBarView.swift   # Preview before sending image
+│
+├── 🧠 ViewModels/
+│   ├── HomeViewModel.swift         # Manages chat list state
+│   └── ChatViewModel.swift         # Manages messages and sending
+│
+├── 📊 DataManager/
+│   ├── ChatsDataManager.swift      # Chat CRUD operations
+│   └── MessagesDataManager.swift   # Agent response simulation
+│
+├── ⚙️ Services/
+│   ├── PersistenceService.swift    # JSON file I/O for chats & messages
+│   ├── SeedDataLoader.swift        # First-launch data seeding
+│   └── ImageStorageService.swift   # Image compression & storage
+│
+├── 📦 Models/
+│   ├── Chat.swift                  # Chat model (id, label, createdAt)
+│   └── Message.swift               # Message model with FileInfo
+│
+├── 🛠️ Utilities/
+│   ├── Constants.swift             # App-wide constants & keys
+│   └── DateFormatters.swift        # Smart timestamp formatting
+│
+├── 📁 Resources/
+│   └── SeedMessages.json           # Default messages for first launch
+│
+└── CrewChatApp.swift               # App entry point
 ```
+
 
 ---
 
@@ -139,9 +211,10 @@ sequenceDiagram
     participant User
     participant ChatView
     participant ImagePicker
-    participant ImagePreviewBar
     participant ImageStorageService
     participant ChatViewModel
+    participant PersistenceService
+    participant MessagesDataManager
 
     User->>ChatView: Taps attachment button
     ChatView->>ChatView: Show ImageSourcePicker
@@ -150,7 +223,7 @@ sequenceDiagram
     User->>ImagePicker: Selects image
     ImagePicker->>ChatView: handleSelectedImage(image)
     ChatView->>ChatView: pendingImage = image
-    ChatView->>ImagePreviewBar: Show preview
+    ChatView->>ChatView: Show preview with ability to discard
     User->>ChatView: Types caption (optional)
     User->>ChatView: Taps Send
     ChatView->>ImageStorageService: saveImage(image)
@@ -158,6 +231,12 @@ sequenceDiagram
     ChatView->>ChatViewModel: sendImageMessage(path, size, caption)
     ChatViewModel->>ChatViewModel: Create Message object
     Note over ChatView: Clear pendingImage
+    ChatViewModel->>PersistenceService: saveMessages(for: chatId)
+    PersistenceService-->>ChatViewModel: Success
+    ChatViewModel->>MessagesDataManager: fetchAgentResponse()
+    Note over MessagesDataManager: Simulated delay (0.5-2.5s)
+    MessagesDataManager-->>ChatViewModel: Agent Message
+    ChatViewModel->>PersistenceService: saveMessages(for: chatId)
 ```
 
 ### App Launch Flow
