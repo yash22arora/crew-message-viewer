@@ -68,13 +68,18 @@ struct ChatView: View {
                 Text(error)
             }
         }
+        .task {
+            await viewModel.loadMessages()
+        }
     }
     
     // MARK: - Messages List
     
     @ViewBuilder
     private var messagesList: some View {
-        if viewModel.messages.isEmpty && !viewModel.isAgentTyping {
+        if viewModel.isLoading {
+            loadingView
+        } else if viewModel.messages.isEmpty && !viewModel.isAgentTyping {
             emptyStateView
         } else {
             ScrollViewReader { proxy in
@@ -172,6 +177,21 @@ struct ChatView: View {
             Spacer()
         }
         .padding()
+    }
+    
+    // MARK: - Loading State
+    
+    private var loadingView: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            ProgressView()
+                .scaleEffect(1.5)
+            Text("Loading messages...")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - Actions

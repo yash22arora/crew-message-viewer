@@ -29,22 +29,24 @@ final class ChatViewModel: ObservableObject {
         self.persistenceService = persistenceService
         self.seedDataLoader = seedDataLoader
         self.dataManager = MessagesDataManager()
-        
-        loadMessages()
     }
     
-    /// Load messages from persistence or seed data
-    func loadMessages() {
+    /// Load messages asynchronously on background thread
+    @MainActor
+    func loadMessages() async {
+        guard !isLoading else { return }
         isLoading = true
         
-        // First, try to load seed data if this is the default chat and first launch
-        if let seedMessages = seedDataLoader.loadSeedDataIfNeeded(for: chat.id) {
-            messages = seedMessages.sorted { $0.timestamp < $1.timestamp }
-        } else {
-            // Load from persistence for this specific chat
-            messages = persistenceService.loadMessages(for: chat.id).sorted { $0.timestamp < $1.timestamp }
-        }
+        // Perform I/O on background thread
+        let loadedMessages = await Task.detached { [self] () -> [Message] in
+            if let seedMessages = self.seedDataLoader.loadSeedDataIfNeeded(for: self.chat.id) {
+                return seedMessages.sorted { $0.timestamp < $1.timestamp }
+            } else {
+                return self.persistenceService.loadMessages(for: self.chat.id).sorted { $0.timestamp < $1.timestamp }
+            }
+        }.value
         
+        messages = loadedMessages
         isLoading = false
     }
     
